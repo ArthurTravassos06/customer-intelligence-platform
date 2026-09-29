@@ -1,3 +1,4 @@
+import math
 import random
 from datetime import datetime, timedelta
 
@@ -20,13 +21,15 @@ states = [
     "CE"
 ]
 
-
-channels = [
-    "organic",
-    "paid_search",
-    "social_media",
-    "referral",
-    "partner"
+state_weights = [
+    0.12,
+    0.30,
+    0.12,
+    0.12,
+    0.10,
+    0.09,
+    0.08,
+    0.07
 ]
 
 
@@ -51,21 +54,83 @@ for customer_id in range(1, NUM_CUSTOMERS + 1):
         datetime(2026, 9, 1)
     )
 
-    birth_date = random_date(
-        datetime(1951, 1, 1),
-        datetime(2008, 1, 1)
+    age = int(
+        random.gauss(38, 12)
+    )
+
+    age = max(
+        18,
+        min(age, 75)
+    )
+
+    birth_date = signup_date - timedelta(
+        days=int(age * 365.25)
+        )
+
+    state = random.choices(
+        states,
+        weights=state_weights,
+        k=1
+    )[0]
+
+    base_income = random.lognormvariate(
+        math.log(4000),
+        0.6
+    )
+
+    age_factor = 1 + (
+        (age - 30) * 0.015
+    )
+
+    income = base_income * age_factor
+
+    income = max(
+        1500,
+        min(income, 50000)
+    )
+
+    income = round(
+        income,
+        2
+    )
+
+    if age < 30:
+
+        channels = [
+            "social_media",
+            "paid_search",
+            "organic"
+        ]
+
+    elif age < 50:
+
+        channels = [
+            "organic",
+            "paid_search",
+            "referral",
+            "partner"
+        ]
+
+    else:
+
+        channels = [
+            "referral",
+            "partner",
+            "organic"
+        ]
+
+    acquisition_channel = random.choice(
+        channels
     )
 
     customer = {
         "customer_id": customer_id,
         "signup_date": signup_date.date(),
         "birth_date": birth_date.date(),
-        "state": random.choice(states),
-        "income": round(
-            random.uniform(1500, 30000),
-            2
-        ),
-        "acquisition_channel": random.choice(channels)
+        "age": age,
+        "state": state,
+        "income": income,
+        "acquisition_channel": acquisition_channel
     }
 
     customers.append(customer)
@@ -74,8 +139,19 @@ for customer_id in range(1, NUM_CUSTOMERS + 1):
 df = pd.DataFrame(customers)
 
 
+assert df["customer_id"].is_unique
+
+assert df["customer_id"].notna().all()
+
+assert (df["income"] > 0).all()
+
+assert (
+    df["age"].between(18, 75)
+).all()
+
+
 df.to_csv(
-    "data/raw/customers.csv",
+    "data/raw/customers_v2.csv",
     index=False
 )
 
@@ -83,5 +159,17 @@ df.to_csv(
 print(df.head())
 
 print(
-    f"\nTotal customers: {len(df)}"
+    df["income"].describe()
+)
+
+print(
+    df["age"].describe()
+)
+
+print(
+    df["state"].value_counts(normalize=True)
+)
+
+print(
+    df["acquisition_channel"].value_counts()
 )
