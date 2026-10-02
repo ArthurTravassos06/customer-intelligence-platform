@@ -172,3 +172,87 @@ WHERE acquisition_channel IN (
     GROUP BY acquisition_channel
     HAVING COUNT(*) > 2000
 );
+-- 11. Find all customers whose income is NULL.
+SELECT
+    *
+FROM customers
+WHERE income IS NULL;
+
+
+-- 12. Return customer_id, state and income,
+--     replacing NULL income values with 0.
+SELECT
+    customer_id,
+    state,
+    income,
+    COALESCE(income, 0) AS income_filled
+FROM customers;
+
+
+-- 13. Return customer_id and income,
+--     converting income to an integer.
+SELECT
+    customer_id,
+    income,
+    CAST(income AS INT) AS income_integer
+FROM customers;
+
+
+-- 14. Return customer_id and signup_date,
+--     converting signup_date to DATE.
+SELECT
+    customer_id,
+    signup_date,
+    CAST(signup_date AS DATE) AS signup_date_casted
+FROM customers;
+
+
+-- 15. Return customer_id and acquisition_channel,
+--     replacing NULL acquisition channels with 'unknown'.
+SELECT
+    customer_id,
+    acquisition_channel,
+    COALESCE(acquisition_channel, 'unknown') AS acquisition_channel_filled
+FROM customers;
+
+-- 16. Return customer_id, signup_date and the year in which each customer signed up.
+SELECT
+    customer_id,
+    signup_date,
+    YEAR(signup_date) AS signup_year
+FROM customers;
+
+
+-- 17. Return customer_id, signup_date and the number of days since signup.
+SELECT
+    customer_id,
+    signup_date,
+    DATEDIFF(CURRENT_DATE(), signup_date) AS days_since_signup
+FROM customers;
+
+
+-- 18. Count how many customers signed up in each year.
+SELECT
+    YEAR(signup_date) AS signup_year,
+    COUNT(*) AS total_customers
+FROM customers
+GROUP BY signup_year
+ORDER BY signup_year;
+
+
+-- 19. Count how many customers signed up in each month of 2025.
+SELECT
+    MONTH(signup_date) AS signup_month,
+    COUNT(*) AS total_customers
+FROM customers
+WHERE YEAR(signup_date) = 2025
+GROUP BY signup_month
+ORDER BY signup_month;
+
+
+-- 20. Find all customers who signed up after January 1, 2026.
+SELECT
+    *
+FROM customers
+WHERE signup_date > DATE '2026-01-01'
+ORDER BY signup_date;
