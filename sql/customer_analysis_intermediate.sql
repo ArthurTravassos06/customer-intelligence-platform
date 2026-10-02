@@ -83,3 +83,92 @@ SELECT
 FROM customer_age_groups
 GROUP BY age_group
 ORDER BY total_customers DESC;
+
+-- 5. Find all customers whose income is above the overall average income.
+SELECT
+    customer_id,
+    state,
+    income
+FROM customer_intelligence_raw.default.customers
+WHERE income > (
+    SELECT
+        AVG(income)
+    FROM customer_intelligence_raw.default.customers
+)
+ORDER BY income DESC;
+
+
+-- 6. Find all customers whose income is below the overall average income.
+SELECT
+    customer_id,
+    state,
+    income
+FROM customer_intelligence_raw.default.customers
+WHERE income < (
+    SELECT
+        AVG(income)
+    FROM customer_intelligence_raw.default.customers
+)
+ORDER BY income DESC;
+
+
+-- 7. Find the customer or customers with the highest income.
+SELECT
+    customer_id,
+    state,
+    income
+FROM customer_intelligence_raw.default.customers
+WHERE income = (
+    SELECT
+        MAX(income)
+    FROM customer_intelligence_raw.default.customers
+);
+
+
+-- 8. Find all customers whose age is above the average customer age.
+SELECT
+    customer_id,
+    state,
+    income,
+    age
+FROM customer_intelligence_raw.default.customers
+WHERE age > (
+    SELECT
+        AVG(age)
+    FROM customer_intelligence_raw.default.customers
+);
+
+
+-- 9. Find all customers who belong to states
+--    where the average income is above 5,500.
+SELECT
+    customer_id,
+    state,
+    age,
+    income
+FROM customer_intelligence_raw.default.customers
+WHERE state IN (
+    SELECT
+        state
+    FROM customer_intelligence_raw.default.customers
+    GROUP BY state
+    HAVING AVG(income) > 5500
+);
+
+
+-- 10. Find all customers who belong to acquisition channels
+--     with more than 2,000 customers.
+SELECT
+    customer_id,
+    state,
+    age,
+    income,
+    acquisition_channel
+FROM customer_intelligence_raw.default.customers
+WHERE acquisition_channel IN (
+    SELECT
+        acquisition_channel
+    FROM customer_intelligence_raw.default.customers
+    GROUP BY acquisition_channel
+    HAVING COUNT(*) > 2000
+);
